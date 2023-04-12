@@ -133,8 +133,6 @@ function createOneTimeRow(opportunityName, accountName, workStartDate, amount) {
  setValueforDate(workStartDate, row, amount); 
 }
 
-
-
 function calculateRevenueByMonth() {
  var range = SpreadsheetApp.getActive().getSheetByName("Payment Schedule").getDataRange();
  var values = range.getValues();
@@ -153,21 +151,22 @@ function calculateRevenueByMonth() {
    var stage = row[2];
    var closedDate = new Date(row[3]);
    var paymentType = row[4];
-   var probability = row[5];
+   var probability = row[5]/100;
    var amount = row[6];
+   var ev = amount * probability;
    var workStartDate = new Date(row[7]);
    var workEndDate = new Date(row[8]);
    
    if (paymentType == "Monthly Retainer") {
-    createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, amount);
+    createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, ev);
    }
 
    else if (paymentType == "One Time") {
-    createOneTimeRow(opportunityName, accountName, workStartDate, amount);
+    createOneTimeRow(opportunityName, accountName, workStartDate, ev);
    }
 
    else if (paymentType == "Audit") {
-    createAuditRow(opportunityName, accountName, closedDate, workEndDate, amount);
+    createAuditRow(opportunityName, accountName, closedDate, workEndDate, ev);
    }
  });
 
