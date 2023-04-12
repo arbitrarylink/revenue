@@ -1,3 +1,4 @@
+// The start date will be updated based on todays date below
 var startDate = new Date("1/1/2023");
 var numMonths = 18;
 
@@ -7,6 +8,7 @@ function getTotalCol() {
   return col;
 }
 
+// This adds the menu item for this macro
 function onOpen() {
   calculateRevenueByMonth();
   const ui = SpreadsheetApp.getUi();
@@ -15,12 +17,13 @@ function onOpen() {
       .addToUi();    
 }
 
+// Utility to find the difference between to dates in months even if they are in different years
 function monthDiff(dateFrom, dateTo) {
  return dateTo.getMonth() - dateFrom.getMonth() + 
    (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
 }
 
-// Sets the value 
+// Puts a value into the proper cell by date and row 
 function setValueforDate(date, row, amount) {
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   diff = monthDiff(startDate, date);
@@ -36,7 +39,7 @@ function setValueforDate(date, row, amount) {
   revenueByMonthSheet.getRange(cell).setNumberFormat("$#,##0.00;$(#,##0.00)"); 
 }
 
-// Sets the lables and totals for a row 
+// Sets the labels and totals for a row 
 function setFixedCells(opportunityName, accountName, row) {
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   revenueByMonthSheet.getRange("A" + row).setValue(opportunityName);
@@ -47,6 +50,7 @@ function setFixedCells(opportunityName, accountName, row) {
  revenueByMonthSheet.getRange(getTotalCol() + row).setNumberFormat("$#,##0.00;$(#,##0.00)");
 }
 
+// This creates the sheet if it does not exist and sets up the headers
 function setupRevenueByMonthSheet() {
  // Create the Revenue By Month Sheet if it does not exist
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
@@ -78,6 +82,7 @@ function setupRevenueByMonthSheet() {
  return revenueByMonthSheet;
 }
 
+// The last row of the spreadsheet contains the totals. This function sets that up.
 function addTotalRow() {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
  var row = revenueByMonthSheet.getLastRow() + 2; 
@@ -97,6 +102,7 @@ function addTotalRow() {
  revenueByMonthSheet.getRange('A'+row+':ZZ'+row).setFontWeight("bold");
 }
 
+// This row represents a monthly retainer
 function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, amount) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var numberOfMonths = workEndDate.getMonth() - workStartDate.getMonth() + 1;
@@ -112,6 +118,9 @@ function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, w
  }
 }
 
+// This row is for an audit
+// If both payments are in the same month the tota=l amount goes in one cell
+// Otherwise the amount is split into two cells
 function createAuditRow(opportunityName, accountName, closedDate, workEndDate, amount) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
@@ -126,6 +135,7 @@ function createAuditRow(opportunityName, accountName, closedDate, workEndDate, a
  }
 }
 
+// This row is for a one time payment
 function createOneTimeRow(opportunityName, accountName, workStartDate, amount) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
@@ -133,11 +143,12 @@ function createOneTimeRow(opportunityName, accountName, workStartDate, amount) {
  setValueforDate(workStartDate, row, amount); 
 }
 
+// This function is the first one called from the menu item
 function calculateRevenueByMonth() {
  var range = SpreadsheetApp.getActive().getSheetByName("Payment Schedule").getDataRange();
  var values = range.getValues();
 
- // Get today's date
+ // Setup the start date
  var now = new Date();
  startDate = now;
  startDate.setMonth(startDate.getMonth()-3);
