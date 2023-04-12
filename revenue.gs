@@ -17,7 +17,7 @@ function onOpen() {
       .addToUi();    
 }
 
-// Utility to find the difference between to dates in months even if they are in different years
+// Utility to find the difference between two dates in months even if they are in different years
 function monthDiff(dateFrom, dateTo) {
  return dateTo.getMonth() - dateFrom.getMonth() + 
    (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
