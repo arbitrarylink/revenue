@@ -157,6 +157,15 @@ function calculateRevenueByMonth() {
  var revenueByMonthSheet = setupRevenueByMonthSheet();
 
  values.forEach(function(row) {  
+   if (row[3] == "") {
+     return;
+   }
+   if (row[7] == "") {
+     return;
+   }
+   if (row[8] == "") {
+     return;
+   }
    var accountName = row[0];
    var opportunityName = row[1];
    var stage = row[2];
