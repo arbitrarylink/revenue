@@ -24,7 +24,7 @@ function monthDiff(dateFrom, dateTo) {
 }
 
 // Puts a value into the proper cell by date and row 
-function setValueforDate(date, row, amount) {
+function setValueforDate(date, row, amount, probability) {
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   diff = monthDiff(startDate, date);
   if (diff < 0) {
@@ -36,7 +36,11 @@ function setValueforDate(date, row, amount) {
   var column = String.fromCharCode(diff+67);
   var cell = column+row;
   revenueByMonthSheet.getRange(cell).setValue(amount);
-  revenueByMonthSheet.getRange(cell).setNumberFormat("$#,##0.00;$(#,##0.00)"); 
+  revenueByMonthSheet.getRange(cell).setNumberFormat("$#,##0.00;$(#,##0.00)");
+
+  if (probability == 1) {
+    revenueByMonthSheet.getRange(cell).setFontColor("green");
+  }
 }
 
 // Sets the labels and totals for a row 
@@ -128,7 +132,7 @@ function addSummaryTotals() {
 }
 
 // This row represents a monthly retainer
-function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, amount) {
+function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var numberOfMonths = workEndDate.getMonth() - workStartDate.getMonth() + 1;
  var pricePerMonth = amount / numberOfMonths; 
@@ -138,7 +142,7 @@ function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, w
 
  var iDate = workStartDate; 
  for (let i = 0; i < numberOfMonths; i++) {
-   setValueforDate(iDate, row, pricePerMonth);
+   setValueforDate(iDate, row, pricePerMonth, probability);
    iDate.setMonth(iDate.getMonth()+1);
  }
 }
@@ -146,26 +150,26 @@ function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, w
 // This row is for an audit
 // If both payments are in the same month the tota=l amount goes in one cell
 // Otherwise the amount is split into two cells
-function createAuditRow(opportunityName, accountName, closedDate, workEndDate, amount) {
+function createAuditRow(opportunityName, accountName, closedDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
  setFixedCells(opportunityName, accountName, row); 
 
  if (closedDate.getMonth() == workEndDate.getMonth()) {
-  setValueforDate(closedDate, row, amount);   
+  setValueforDate(closedDate, row, amount, probability);
  }
  else {
-  setValueforDate(closedDate, row, amount/2); 
-  setValueforDate(workEndDate, row, amount/2);   
+  setValueforDate(closedDate, row, amount/2, probability);
+  setValueforDate(workEndDate, row, amount/2, probability);
  }
 }
 
 // This row is for a one time payment
-function createOneTimeRow(opportunityName, accountName, workStartDate, amount) {
+function createOneTimeRow(opportunityName, accountName, workStartDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
  setFixedCells(opportunityName, accountName, row); 
- setValueforDate(workStartDate, row, amount); 
+ setValueforDate(workStartDate, row, amount, probability);
 }
 
 // This function is the first one called from the menu item
@@ -203,15 +207,15 @@ function calculateRevenueByMonth() {
    var workEndDate = new Date(row[8]);
    
    if (paymentType == "Monthly Retainer") {
-    createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, ev);
+    createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, ev, probability);
    }
 
    else if (paymentType == "One Time") {
-    createOneTimeRow(opportunityName, accountName, workStartDate, ev);
+    createOneTimeRow(opportunityName, accountName, workStartDate, ev, probability);
    }
 
    else if (paymentType == "Audit") {
-    createAuditRow(opportunityName, accountName, closedDate, workEndDate, ev);
+    createAuditRow(opportunityName, accountName, closedDate, workEndDate, ev, probability);
    }
  });
 
