@@ -10,7 +10,6 @@ function getTotalCol() {
 
 // This adds the menu item for this macro
 function onOpen() {
-  calculateRevenueByMonth();
   const ui = SpreadsheetApp.getUi();
   ui.createMenu('My Custom Menu')
       .addItem('Calculate Revenue By Month', 'calculateRevenueByMonth')
@@ -87,30 +86,24 @@ function setupRevenueByMonthSheet() {
 }
 
 // The last row of the spreadsheet contains the totals. This function sets that up.
-function addTotalRow() {
+function createTotals() {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
- var row = revenueByMonthSheet.getLastRow() + 2; 
+ var totalRow = revenueByMonthSheet.getLastRow() + 2;
 
- revenueByMonthSheet.getRange("A"+row).setValue("Total");   
+ revenueByMonthSheet.getRange("A"+totalRow).setValue("Total");
 
  for (let i = 67; i <= 67+numMonths; i++) {
    var column = String.fromCharCode(i);
-   var cell = column+row;
+   var cell = column+totalRow;
    var rangeStart = column+2;
-   var rangeEnd = column+(row-1);
+   var rangeEnd = column+(totalRow-1);
    revenueByMonthSheet.getRange(cell).setValue("=SUM("+rangeStart+":"+rangeEnd+")"); 
    revenueByMonthSheet.getRange(cell).setNumberFormat("$#,##0.00;$(#,##0.00)")  
  }
 
  // Make the heading bold
- revenueByMonthSheet.getRange('A'+row+':ZZ'+row).setFontWeight("bold");
-}
+ revenueByMonthSheet.getRange('A'+totalRow+':ZZ'+totalRow).setFontWeight("bold");
 
-// This adds the 3 month and 12 month totals.
-// This must be called after Add Total Row since it uses getLastRow to figure out where to place these totals
-function addSummaryTotals() {
-  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
-  var totalRow = revenueByMonthSheet.getLastRow();
   var threeMonthRow = totalRow + 2;
   var twelveMonthRow = threeMonthRow + 1;
 
@@ -118,15 +111,17 @@ function addSummaryTotals() {
   revenueByMonthSheet.getRange("A" + threeMonthRow).setValue("Next 3 Months Total");
   revenueByMonthSheet.getRange("A" + twelveMonthRow).setValue("Next 12 Months Total");
 
+  // "A" is 65. We add 2 because we have two label colums.
+  // We also start by adding 3 to the start colum because we are starting three months before todays date.
   var startColumn = String.fromCharCode(3+67);
-  var thirdMonthColumn = String.fromCharCode(5+67);
-  var twelfthMonthColumn = String.fromCharCode(14+67);
+  var threeMonthColumn = String.fromCharCode(5+67);
+  var twelveMonthColumn = String.fromCharCode(14+67);
   var rangeStart = startColumn+totalRow;
-  var rangeEnd = thirdMonthColumn+totalRow;
+  var rangeEnd = threeMonthColumn+totalRow;
   revenueByMonthSheet.getRange("B" + threeMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");  
 
   rangeStart = startColumn+totalRow;
-  rangeEnd = twelfthMonthColumn+totalRow;
+  rangeEnd = twelveMonthColumn+totalRow;
   revenueByMonthSheet.getRange("B" + twelveMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");  
   revenueByMonthSheet.getRange('A'+threeMonthRow+':B'+twelveMonthRow).setFontWeight("bold");
 }
@@ -186,15 +181,11 @@ function calculateRevenueByMonth() {
  var revenueByMonthSheet = setupRevenueByMonthSheet();
 
  values.forEach(function(row) {  
-   if (row[3] == "") {
+
+   if (row[3] == "" || row[7] == "" || row[8] == "") {
      return;
    }
-   if (row[7] == "") {
-     return;
-   }
-   if (row[8] == "") {
-     return;
-   }
+
    var accountName = row[0];
    var opportunityName = row[1];
    var stage = row[2];
@@ -219,6 +210,5 @@ function calculateRevenueByMonth() {
    }
  });
 
- addTotalRow();
- addSummaryTotals();
+ createTotals();
 }
