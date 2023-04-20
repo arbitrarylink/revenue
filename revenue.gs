@@ -102,6 +102,31 @@ function addTotalRow() {
  revenueByMonthSheet.getRange('A'+row+':ZZ'+row).setFontWeight("bold");
 }
 
+// This adds the 3 month and 12 month totals.
+// This must be called after Add Total Row since it uses getLastRow to figure out where to place these totals
+function addSummaryTotals() {
+  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
+  var totalRow = revenueByMonthSheet.getLastRow();
+  var threeMonthRow = totalRow + 2;
+  var twelveMonthRow = threeMonthRow + 1;
+
+  // Add the labels
+  revenueByMonthSheet.getRange("A" + threeMonthRow).setValue("Next 3 Months Total");
+  revenueByMonthSheet.getRange("A" + twelveMonthRow).setValue("Next 12 Months Total");
+
+  var startColumn = String.fromCharCode(3+67);
+  var thirdMonthColumn = String.fromCharCode(5+67);
+  var twelfthMonthColumn = String.fromCharCode(14+67);
+  var rangeStart = startColumn+totalRow;
+  var rangeEnd = thirdMonthColumn+totalRow;
+  revenueByMonthSheet.getRange("B" + threeMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");  
+
+  rangeStart = startColumn+totalRow;
+  rangeEnd = twelfthMonthColumn+totalRow;
+  revenueByMonthSheet.getRange("B" + twelveMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");  
+  revenueByMonthSheet.getRange('A'+threeMonthRow+':B'+twelveMonthRow).setFontWeight("bold");
+}
+
 // This row represents a monthly retainer
 function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, amount) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
@@ -191,4 +216,5 @@ function calculateRevenueByMonth() {
  });
 
  addTotalRow();
+ addSummaryTotals();
 }
