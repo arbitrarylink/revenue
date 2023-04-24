@@ -2,9 +2,12 @@
 var startDate = new Date("1/1/2023");
 var numMonths = 18;
 
+// 65 is ascii for 'A'.  We add three more because there are 3 columns that do not represent months
+var colOffset = 67;
+
 // Returns the letter for the total column
 function getTotalCol() {
-  col = String.fromCharCode(67+numMonths);
+  col = String.fromCharCode(colOffset+numMonths);
   return col;
 }
 
@@ -32,7 +35,7 @@ function setValueforDate(date, row, amount, probability) {
   if (diff > numMonths) {
     return;
   }
-  var column = String.fromCharCode(diff+67);
+  var column = String.fromCharCode(diff+colOffset);
   var cell = column+row;
   revenueByMonthSheet.getRange(cell).setValue(amount);
   revenueByMonthSheet.getRange(cell).setNumberFormat("$#,##0.00;$(#,##0.00)");
@@ -72,8 +75,8 @@ function setupRevenueByMonthSheet() {
  var monthHeading = new Date(startDate.getTime());
 
  // We will loop through the numMonths months
- for (let i = 1; i <= numMonths; i++) {
-  var cell = String.fromCharCode(i+66) + "1";
+ for (let i = 0; i < numMonths; i++) {
+  var cell = String.fromCharCode(i+colOffset) + "1";
   var monthHeadingString = Utilities.formatDate(monthHeading, Session.getScriptTimeZone(), "MMM-YYYY");
   revenueByMonthSheet.getRange(cell).setValue(monthHeadingString);
   monthHeading.setMonth(monthHeading.getMonth()+1);
@@ -92,7 +95,7 @@ function createTotals() {
 
  revenueByMonthSheet.getRange("A"+totalRow).setValue("Total");
 
- for (let i = 67; i <= 67+numMonths; i++) {
+ for (let i = colOffset; i <= colOffset+numMonths; i++) {
    var column = String.fromCharCode(i);
    var cell = column+totalRow;
    var rangeStart = column+2;
@@ -111,11 +114,10 @@ function createTotals() {
   revenueByMonthSheet.getRange("A" + threeMonthRow).setValue("Next 3 Months Total");
   revenueByMonthSheet.getRange("A" + twelveMonthRow).setValue("Next 12 Months Total");
 
-  // "A" is 65. We add 2 because we have two label colums.
   // We also start by adding 3 to the start colum because we are starting three months before todays date.
-  var startColumn = String.fromCharCode(3+67);
-  var threeMonthColumn = String.fromCharCode(5+67);
-  var twelveMonthColumn = String.fromCharCode(14+67);
+  var startColumn = String.fromCharCode(3+colOffset);
+  var threeMonthColumn = String.fromCharCode(5+colOffset);
+  var twelveMonthColumn = String.fromCharCode(14+colOffset);
   var rangeStart = startColumn+totalRow;
   var rangeEnd = threeMonthColumn+totalRow;
   revenueByMonthSheet.getRange("B" + threeMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");  
