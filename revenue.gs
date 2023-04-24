@@ -52,9 +52,11 @@ function setFixedCells(opportunityName, accountName, stage, row) {
   revenueByMonthSheet.getRange("B" + row).setValue(accountName);
   revenueByMonthSheet.getRange("C" + row).setValue(stage);
 
+  var firstMonthCol = String.fromCharCode(colOffset);
+  var lastMonthCol = String.fromCharCode(colOffset+numMonths-1);
+
  // Add the total formula at the end
- // TODO C and U are fixed these need to be fixed.
- revenueByMonthSheet.getRange(getTotalCol() + row).setValue("=SUM(D"+row+":U"+row+")");
+ revenueByMonthSheet.getRange(getTotalCol() + row).setValue("=SUM(" + firstMonthCol + row + ":" + lastMonthCol + row + ")");
  revenueByMonthSheet.getRange(getTotalCol() + row).setNumberFormat("$#,##0.00;$(#,##0.00)");
 }
 
