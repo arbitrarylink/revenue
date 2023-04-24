@@ -3,7 +3,7 @@ var startDate = new Date("1/1/2023");
 var numMonths = 18;
 
 // 65 is ascii for 'A'.  We add three more because there are 3 columns that do not represent months
-var colOffset = 67;
+var colOffset = 68;
 
 // Returns the letter for the total column
 function getTotalCol() {
@@ -46,13 +46,15 @@ function setValueforDate(date, row, amount, probability) {
 }
 
 // Sets the labels and totals for a row 
-function setFixedCells(opportunityName, accountName, row) {
+function setFixedCells(opportunityName, accountName, stage, row) {
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   revenueByMonthSheet.getRange("A" + row).setValue(opportunityName);
   revenueByMonthSheet.getRange("B" + row).setValue(accountName);
+  revenueByMonthSheet.getRange("C" + row).setValue(stage);
 
  // Add the total formula at the end
- revenueByMonthSheet.getRange(getTotalCol() + row).setValue("=SUM(B"+row+":N"+row+")");
+ // TODO C and U are fixed these need to be fixed.
+ revenueByMonthSheet.getRange(getTotalCol() + row).setValue("=SUM(D"+row+":U"+row+")");
  revenueByMonthSheet.getRange(getTotalCol() + row).setNumberFormat("$#,##0.00;$(#,##0.00)");
 }
 
@@ -70,6 +72,7 @@ function setupRevenueByMonthSheet() {
 
  revenueByMonthSheet.getRange('A1').setValue('Opportunity');
  revenueByMonthSheet.getRange('B1').setValue('Account');
+ revenueByMonthSheet.getRange('C1').setValue('Stage');
  revenueByMonthSheet.getRange(getTotalCol() + '1').setValue('Total');
 
  var monthHeading = new Date(startDate.getTime());
@@ -129,13 +132,13 @@ function createTotals() {
 }
 
 // This row represents a monthly retainer
-function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, amount, probability) {
+function createMonthlyRetainerRow(opportunityName, accountName, stage, workStartDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var numberOfMonths = monthDiff(workStartDate, workEndDate) + 1;
  var pricePerMonth = amount / numberOfMonths; 
  var row = revenueByMonthSheet.getLastRow() + 1;
  
- setFixedCells(opportunityName, accountName, row);
+ setFixedCells(opportunityName, accountName, stage, row);
 
  var iDate = workStartDate; 
  for (let i = 0; i < numberOfMonths; i++) {
@@ -147,10 +150,10 @@ function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, w
 // This row is for an audit
 // If both payments are in the same month the tota=l amount goes in one cell
 // Otherwise the amount is split into two cells
-function createAuditRow(opportunityName, accountName, closedDate, workEndDate, amount, probability) {
+function createAuditRow(opportunityName, accountName, stage, closedDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
- setFixedCells(opportunityName, accountName, row); 
+ setFixedCells(opportunityName, accountName, stage, row);
 
  if (closedDate.getMonth() == workEndDate.getMonth()) {
   setValueforDate(closedDate, row, amount, probability);
@@ -162,10 +165,10 @@ function createAuditRow(opportunityName, accountName, closedDate, workEndDate, a
 }
 
 // This row is for a one time payment
-function createOneTimeRow(opportunityName, accountName, workStartDate, amount, probability) {
+function createOneTimeRow(opportunityName, accountName, stage, workStartDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
- setFixedCells(opportunityName, accountName, row); 
+ setFixedCells(opportunityName, accountName, stage, row);
  setValueforDate(workStartDate, row, amount, probability);
 }
 
@@ -200,15 +203,15 @@ function calculateRevenueByMonth() {
    var workEndDate = new Date(row[8]);
    
    if (paymentType == "Monthly Retainer") {
-    createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, ev, probability);
+    createMonthlyRetainerRow(opportunityName, accountName, stage, workStartDate, workEndDate, ev, probability);
    }
 
    else if (paymentType == "One Time") {
-    createOneTimeRow(opportunityName, accountName, workStartDate, ev, probability);
+    createOneTimeRow(opportunityName, accountName, stage, workStartDate, ev, probability);
    }
 
    else if (paymentType == "Audit") {
-    createAuditRow(opportunityName, accountName, closedDate, workEndDate, ev, probability);
+    createAuditRow(opportunityName, accountName, stage, closedDate, workEndDate, ev, probability);
    }
  });
 
