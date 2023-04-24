@@ -129,7 +129,7 @@ function createTotals() {
 // This row represents a monthly retainer
 function createMonthlyRetainerRow(opportunityName, accountName, workStartDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
- var numberOfMonths = workEndDate.getMonth() - workStartDate.getMonth() + 1;
+ var numberOfMonths = monthDiff(workStartDate, workEndDate) + 1;
  var pricePerMonth = amount / numberOfMonths; 
  var row = revenueByMonthSheet.getLastRow() + 1;
  
