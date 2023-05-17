@@ -113,24 +113,42 @@ function createTotals() {
  revenueByMonthSheet.getRange('A'+totalRow+':ZZ'+totalRow).setFontWeight("bold");
 
   var threeMonthRow = totalRow + 2;
-  var twelveMonthRow = threeMonthRow + 1;
+  var sixMonthRow = threeMonthRow + 1;
+  var twelveMonthRow = threeMonthRow + 2;
+  var expensesRow = threeMonthRow + 4;
+  var ratioRow = threeMonthRow + 5;
 
   // Add the labels
   revenueByMonthSheet.getRange("A" + threeMonthRow).setValue("Next 3 Months Total");
+  revenueByMonthSheet.getRange("A" + sixMonthRow).setValue("Next 6 Months Total");
   revenueByMonthSheet.getRange("A" + twelveMonthRow).setValue("Next 12 Months Total");
+  revenueByMonthSheet.getRange("A" + expensesRow).setValue("Expenses (3 months)");
+  revenueByMonthSheet.getRange("A" + ratioRow).setValue("Ratio");
 
   // We also start by adding 3 to the start colum because we are starting three months before todays date.
   var startColumn = String.fromCharCode(3+colOffset);
   var threeMonthColumn = String.fromCharCode(5+colOffset);
+  var sixMonthColumn = String.fromCharCode(8+colOffset);
   var twelveMonthColumn = String.fromCharCode(14+colOffset);
+
   var rangeStart = startColumn+totalRow;
   var rangeEnd = threeMonthColumn+totalRow;
   revenueByMonthSheet.getRange("B" + threeMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");  
+
+  var rangeStart = startColumn+totalRow;
+  var rangeEnd = sixMonthColumn+totalRow;
+  revenueByMonthSheet.getRange("B" + sixMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");
 
   rangeStart = startColumn+totalRow;
   rangeEnd = twelveMonthColumn+totalRow;
   revenueByMonthSheet.getRange("B" + twelveMonthRow).setValue("=SUM("+rangeStart+":"+rangeEnd+")");  
   revenueByMonthSheet.getRange('A'+threeMonthRow+':B'+twelveMonthRow).setFontWeight("bold");
+
+  var threeMonthTotal = "B"+threeMonthRow;
+  var expenses = "B"+expensesRow;
+  revenueByMonthSheet.getRange("B" + ratioRow).setValue("="+threeMonthTotal+"/"+expenses);
+  revenueByMonthSheet.getRange("B" + expensesRow).setValue("948000");
+  revenueByMonthSheet.getRange("B" + expensesRow).setNumberFormat("$#,##0.00;$(#,##0.00)");
 }
 
 // This row represents a monthly retainer
