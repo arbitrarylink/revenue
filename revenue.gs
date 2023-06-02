@@ -122,7 +122,7 @@ function createTotals() {
   revenueByMonthSheet.getRange("A" + threeMonthRow).setValue("Next 3 Months Total");
   revenueByMonthSheet.getRange("A" + sixMonthRow).setValue("Next 6 Months Total");
   revenueByMonthSheet.getRange("A" + twelveMonthRow).setValue("Next 12 Months Total");
-  revenueByMonthSheet.getRange("A" + expensesRow).setValue("Expenses (3 months)");
+  revenueByMonthSheet.getRange("A" + expensesRow).setValue("Expenses (3 months) Manual Update");
   revenueByMonthSheet.getRange("A" + ratioRow).setValue("Ratio");
 
   // We also start by adding 3 to the start colum because we are starting three months before todays date.
@@ -147,6 +147,7 @@ function createTotals() {
   var threeMonthTotal = "B"+threeMonthRow;
   var expenses = "B"+expensesRow;
   revenueByMonthSheet.getRange("B" + ratioRow).setValue("="+threeMonthTotal+"/"+expenses);
+  revenueByMonthSheet.getRange("B" + ratioRow).setNumberFormat("0.000");
   revenueByMonthSheet.getRange("B" + expensesRow).setValue("948000");
   revenueByMonthSheet.getRange("B" + expensesRow).setNumberFormat("$#,##0.00;$(#,##0.00)");
 }
