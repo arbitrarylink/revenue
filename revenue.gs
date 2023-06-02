@@ -222,7 +222,12 @@ function calculateRevenueByMonth() {
    var ev = amount * probability;
    var workStartDate = new Date(row[7]);
    var workEndDate = new Date(row[8]);
-   
+
+   // Do not make a row if there will be no revenue for the time period shown
+   if (workEndDate < startDate) {
+    return;
+   }
+
    if (paymentType == "Monthly Retainer") {
     createMonthlyRetainerRow(opportunityName, accountName, stage, workStartDate, workEndDate, ev, probability);
    }
