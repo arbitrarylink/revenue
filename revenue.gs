@@ -193,6 +193,25 @@ function createOneTimeRow(opportunityName, accountName, stage, workStartDate, am
  setValueforDate(workStartDate, row, amount, probability);
 }
 
+// This row is for a payment schedule of milestones
+function createMilestonesRow(opportunityName, accountName, stage, milestones, amount, probability) {
+  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
+  var row = revenueByMonthSheet.getLastRow() + 1;
+  setFixedCells(opportunityName, accountName, stage, row);
+
+  // We need to parse the milestones field to get the separate milestone dates and amounts
+  const splitLines = str => str.split(/\r?\n/);
+  lines = splitLines(milestones);
+
+  // Loop through each milestone and add it to the sheet
+  lines.forEach(function (item) {
+    milestone = item.split(" ");
+    var milestoneDate = new Date(milestone[0]);
+    var milestoneAmount = milestone[1];
+    setValueforDate(milestoneDate, row, milestoneAmount, probability);
+  });
+}
+
 // This function is the first one called from the menu item
 function calculateRevenueByMonth() {
  var range = SpreadsheetApp.getActive().getSheetByName("Payment Schedule").getDataRange();
@@ -222,6 +241,7 @@ function calculateRevenueByMonth() {
    var ev = amount * probability;
    var workStartDate = new Date(row[7]);
    var workEndDate = new Date(row[8]);
+   var milestones = row[9];
 
    // Do not make a row if there will be no revenue for the time period shown
    if (workEndDate < startDate) {
@@ -238,6 +258,10 @@ function calculateRevenueByMonth() {
 
    else if (paymentType == "Audit") {
     createAuditRow(opportunityName, accountName, stage, closedDate, workEndDate, ev, probability);
+   }
+
+   else if (paymentType == "Milestones") {
+      createMilestonesRow(opportunityName, accountName, stage, milestones, ev, probability);
    }
  });
 
