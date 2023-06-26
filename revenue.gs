@@ -25,8 +25,8 @@ function monthDiff(dateFrom, dateTo) {
    (12 * (dateTo.getFullYear() - dateFrom.getFullYear()))
 }
 
-// Puts a value into the proper cell by date and row 
-function setValueforDate(date, row, amount, probability) {
+// Adds a value into the proper cell by date and row
+function addValuetoDateCell(date, row, amount, probability) {
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   diff = monthDiff(startDate, date);
   if (diff < 0) {
@@ -37,7 +37,8 @@ function setValueforDate(date, row, amount, probability) {
   }
   var column = String.fromCharCode(diff+colOffset);
   var cell = column+row;
-  revenueByMonthSheet.getRange(cell).setValue(amount);
+  var oldValue = Number(revenueByMonthSheet.getRange(cell).getValue());
+  revenueByMonthSheet.getRange(cell).setValue(Number(amount)+oldValue);
   revenueByMonthSheet.getRange(cell).setNumberFormat("$#,##0.00;$(#,##0.00)");
 
   if (probability == 1) {
@@ -163,13 +164,13 @@ function createMonthlyRetainerRow(opportunityName, accountName, stage, workStart
 
  var iDate = workStartDate; 
  for (let i = 0; i < numberOfMonths; i++) {
-   setValueforDate(iDate, row, pricePerMonth, probability);
+   addValuetoDateCell(iDate, row, pricePerMonth, probability);
    iDate.setMonth(iDate.getMonth()+1);
  }
 }
 
 // This row is for an audit
-// If both payments are in the same month the tota=l amount goes in one cell
+// If both payments are in the same month the total amount goes in one cell
 // Otherwise the amount is split into two cells
 function createAuditRow(opportunityName, accountName, stage, closedDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
@@ -177,11 +178,11 @@ function createAuditRow(opportunityName, accountName, stage, closedDate, workEnd
  setFixedCells(opportunityName, accountName, stage, row);
 
  if (closedDate.getMonth() == workEndDate.getMonth()) {
-  setValueforDate(closedDate, row, amount, probability);
+  addValuetoDateCell(closedDate, row, amount, probability);
  }
  else {
-  setValueforDate(closedDate, row, amount/2, probability);
-  setValueforDate(workEndDate, row, amount/2, probability);
+  addValuetoDateCell(closedDate, row, amount/2, probability);
+  addValuetoDateCell(workEndDate, row, amount/2, probability);
  }
 }
 
@@ -190,11 +191,16 @@ function createOneTimeRow(opportunityName, accountName, stage, workStartDate, am
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
  setFixedCells(opportunityName, accountName, stage, row);
- setValueforDate(workStartDate, row, amount, probability);
+ addValuetoDateCell(workStartDate, row, amount, probability);
 }
 
 // This row is for a payment schedule of milestones
 function createMilestonesRow(opportunityName, accountName, stage, milestones, amount, probability) {
+  // Bail if there is no milestone data
+  if (milestones == "") {
+    return;
+  }
+
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   var row = revenueByMonthSheet.getLastRow() + 1;
   setFixedCells(opportunityName, accountName, stage, row);
@@ -208,7 +214,7 @@ function createMilestonesRow(opportunityName, accountName, stage, milestones, am
     milestone = item.split(" ");
     var milestoneDate = new Date(milestone[0]);
     var milestoneAmount = milestone[1];
-    setValueforDate(milestoneDate, row, milestoneAmount, probability);
+    addValuetoDateCell(milestoneDate, row, milestoneAmount, probability);
   });
 }
 
