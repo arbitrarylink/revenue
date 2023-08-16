@@ -149,7 +149,7 @@ function createTotals() {
   var expenses = "B"+expensesRow;
   revenueByMonthSheet.getRange("B" + ratioRow).setValue("="+threeMonthTotal+"/"+expenses);
   revenueByMonthSheet.getRange("B" + ratioRow).setNumberFormat("0.000");
-  revenueByMonthSheet.getRange("B" + expensesRow).setValue("948000");
+  revenueByMonthSheet.getRange("B" + expensesRow).setValue("728502");
   revenueByMonthSheet.getRange("B" + expensesRow).setNumberFormat("$#,##0.00;$(#,##0.00)");
 }
 
@@ -213,7 +213,7 @@ function createMilestonesRow(opportunityName, accountName, stage, milestones, am
   lines.forEach(function (item) {
     milestone = item.split(" ");
     var milestoneDate = new Date(milestone[0]);
-    var milestoneAmount = milestone[1];
+    var milestoneAmount = milestone[1] * probability;
     addValuetoDateCell(milestoneDate, row, milestoneAmount, probability);
   });
 }
