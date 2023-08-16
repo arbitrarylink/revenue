@@ -2,8 +2,8 @@
 var startDate = new Date("1/1/2023");
 var numMonths = 18;
 
-// 65 is ascii for 'A'.  We add three more because there are 3 columns that do not represent months
-var colOffset = 68;
+// 65 is ascii for 'A'.  We add 4 more because there are 4 columns that do not represent months
+var colOffset = 69;
 
 // Returns the letter for the total column
 function getTotalCol() {
@@ -47,11 +47,12 @@ function addValuetoDateCell(date, row, amount, probability) {
 }
 
 // Sets the labels and totals for a row 
-function setFixedCells(opportunityName, accountName, stage, row) {
+function setFixedCells(opportunityName, accountName, stage, owner, row) {
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   revenueByMonthSheet.getRange("A" + row).setValue(opportunityName);
   revenueByMonthSheet.getRange("B" + row).setValue(accountName);
   revenueByMonthSheet.getRange("C" + row).setValue(stage);
+  revenueByMonthSheet.getRange("D" + row).setValue(owner);
 
   var firstMonthCol = String.fromCharCode(colOffset);
   var lastMonthCol = String.fromCharCode(colOffset+numMonths-1);
@@ -76,6 +77,7 @@ function setupRevenueByMonthSheet() {
  revenueByMonthSheet.getRange('A1').setValue('Opportunity');
  revenueByMonthSheet.getRange('B1').setValue('Account');
  revenueByMonthSheet.getRange('C1').setValue('Stage');
+ revenueByMonthSheet.getRange('D1').setValue('Owner');
  revenueByMonthSheet.getRange(getTotalCol() + '1').setValue('Total');
 
  var monthHeading = new Date(startDate.getTime());
@@ -154,13 +156,13 @@ function createTotals() {
 }
 
 // This row represents a monthly retainer
-function createMonthlyRetainerRow(opportunityName, accountName, stage, workStartDate, workEndDate, amount, probability) {
+function createMonthlyRetainerRow(opportunityName, accountName, stage, owner, workStartDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var numberOfMonths = monthDiff(workStartDate, workEndDate) + 1;
  var pricePerMonth = amount / numberOfMonths; 
  var row = revenueByMonthSheet.getLastRow() + 1;
  
- setFixedCells(opportunityName, accountName, stage, row);
+ setFixedCells(opportunityName, accountName, stage, owner, row);
 
  var iDate = workStartDate; 
  for (let i = 0; i < numberOfMonths; i++) {
@@ -172,10 +174,10 @@ function createMonthlyRetainerRow(opportunityName, accountName, stage, workStart
 // This row is for an audit
 // If both payments are in the same month the total amount goes in one cell
 // Otherwise the amount is split into two cells
-function createAuditRow(opportunityName, accountName, stage, closedDate, workEndDate, amount, probability) {
+function createAuditRow(opportunityName, accountName, stage, owner, closedDate, workEndDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
- setFixedCells(opportunityName, accountName, stage, row);
+ setFixedCells(opportunityName, accountName, stage, owner, row);
 
  if (closedDate.getMonth() == workEndDate.getMonth()) {
   addValuetoDateCell(closedDate, row, amount, probability);
@@ -187,15 +189,15 @@ function createAuditRow(opportunityName, accountName, stage, closedDate, workEnd
 }
 
 // This row is for a one time payment
-function createOneTimeRow(opportunityName, accountName, stage, workStartDate, amount, probability) {
+function createOneTimeRow(opportunityName, accountName, stage, owner, workStartDate, amount, probability) {
  var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");  
  var row = revenueByMonthSheet.getLastRow() + 1;
- setFixedCells(opportunityName, accountName, stage, row);
+ setFixedCells(opportunityName, accountName, stage, owner, row);
  addValuetoDateCell(workStartDate, row, amount, probability);
 }
 
 // This row is for a payment schedule of milestones
-function createMilestonesRow(opportunityName, accountName, stage, milestones, amount, probability) {
+function createMilestonesRow(opportunityName, accountName, stage, owner, milestones, amount, probability) {
   // Bail if there is no milestone data
   if (milestones == "") {
     return;
@@ -203,7 +205,7 @@ function createMilestonesRow(opportunityName, accountName, stage, milestones, am
 
   var revenueByMonthSheet = SpreadsheetApp.getActive().getSheetByName("Revenue By Month");
   var row = revenueByMonthSheet.getLastRow() + 1;
-  setFixedCells(opportunityName, accountName, stage, row);
+  setFixedCells(opportunityName, accountName, stage, owner, row);
 
   // We need to parse the milestones field to get the separate milestone dates and amounts
   const splitLines = str => str.split(/\r?\n/);
@@ -248,6 +250,7 @@ function calculateRevenueByMonth() {
    var workStartDate = new Date(row[7]);
    var workEndDate = new Date(row[8]);
    var milestones = row[9];
+   var owner = row[10];
 
    // Do not make a row if there will be no revenue for the time period shown
    if (workEndDate < startDate) {
@@ -255,19 +258,19 @@ function calculateRevenueByMonth() {
    }
 
    if (paymentType == "Monthly Retainer") {
-    createMonthlyRetainerRow(opportunityName, accountName, stage, workStartDate, workEndDate, ev, probability);
+    createMonthlyRetainerRow(opportunityName, accountName, stage, owner, workStartDate, workEndDate, ev, probability);
    }
 
    else if (paymentType == "One Time") {
-    createOneTimeRow(opportunityName, accountName, stage, workStartDate, ev, probability);
+    createOneTimeRow(opportunityName, accountName, stage, owner, workStartDate, ev, probability);
    }
 
    else if (paymentType == "Audit") {
-    createAuditRow(opportunityName, accountName, stage, closedDate, workEndDate, ev, probability);
+    createAuditRow(opportunityName, accountName, stage, owner, closedDate, workEndDate, ev, probability);
    }
 
    else if (paymentType == "Milestones") {
-      createMilestonesRow(opportunityName, accountName, stage, milestones, ev, probability);
+      createMilestonesRow(opportunityName, accountName, stage, owner, milestones, ev, probability);
    }
  });
 
